@@ -192,17 +192,18 @@
     </div>
 
     <div class="tab-panel active" id="keyTab">
+      <p style="font-size:13px; color:var(--ink-soft); line-height:1.6; margin-top:0;">This site works out of the box — no key needed. If you're doing heavy use, you can optionally add your own key below.</p>
       <details>
-        <summary>How do I get a free API key? (2 minutes)</summary>
+        <summary>Use your own API key instead (optional)</summary>
         <ol>
           <li>Go to the <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">Google Cloud Console — YouTube Data API</a> page and sign in.</li>
           <li>Click <b>Enable</b> (create a project first if prompted).</li>
           <li>Go to <b>Credentials → Create Credentials → API key</b>.</li>
-          <li>Copy it below. It's used only from your browser, sent only to Google's API.</li>
+          <li>Copy it below.</li>
         </ol>
       </details>
-      <label for="apikey">YouTube Data API key</label>
-      <input type="password" id="apikey" placeholder="AIza..." autocomplete="off">
+      <label for="apikey">YouTube Data API key (optional)</label>
+      <input type="password" id="apikey" placeholder="Leave blank to use the built-in key" autocomplete="off">
     </div>
 
     <div class="tab-panel" id="signinTab">
@@ -248,10 +249,11 @@
     </div>
   </div>
 
-  <p class="note">Reads public or authorized metadata via YouTube's official Data API — the same information visible on the playlist page. Video titles on music uploads often already contain "Artist – Song"; the channel name is the closest thing YouTube's API exposes to a credited artist for regular uploads, and won't always be exact.</p>
+  <p class="note">Made by <a href="https://visualixe-foundation.vercel.app" target="_blank" rel="noopener" style="color: var(--accent-2);">Visualixe Foundation</a></p>
 </div>
 
 <script>
+const SHARED_API_KEY = "AIzaSyCrpOmxL4KJQR1SDRWf-m-3h6pqpqmDFas";
 let currentTracks = [];
 let currentPlaylistTitle = "playlist";
 let oauthToken = null;
@@ -448,11 +450,11 @@ function toSpotifyLinks(tracks){
 }
 
 document.getElementById('fetchBtn').addEventListener('click', async () => {
-  const apiKey = document.getElementById('apikey').value.trim();
+  const apiKey = document.getElementById('apikey').value.trim() || SHARED_API_KEY;
   const playlistUrl = document.getElementById('playlisturl').value.trim();
   const btn = document.getElementById('fetchBtn');
 
-  if(activeMode === 'key' && !apiKey){ setStatus('Add your API key first, or switch to the Private tab.', true); return; }
+  if(activeMode === 'key' && !apiKey){ setStatus('Something went wrong — no API key available.', true); return; }
   if(activeMode === 'oauth' && !oauthToken){ setStatus('Sign in with Google first (Private tab).', true); return; }
 
   const playlistId = extractPlaylistId(playlistUrl);
