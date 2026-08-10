@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manifest — Playlist Cataloger</title>
+<meta name="description" content="Catalog any YouTube playlist's tracklist — titles and channels — as a downloadable list. No files downloaded, just data.">
+<meta property="og:title" content="Manifest — Playlist Cataloger">
+<meta property="og:description" content="Paste a YouTube playlist link and get every track's title and channel as a clean, downloadable list.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2314120F'/%3E%3Ccircle cx='50' cy='50' r='30' fill='%23E8A23D'/%3E%3Ccircle cx='50' cy='50' r='7' fill='%2314120F'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,900;1,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -20,19 +25,51 @@
     --muted: #8C8577;
     --line: rgba(30,27,22,0.18);
     --danger: #B24B3C;
+    --text-on-bg: #FAF4E6;
+  }
+  body[data-theme="light"]{
+    --bg: #F2EDE0;
+    --bg-2: #E8E0CC;
+    --card: #FFFFFF;
+    --ink: #1E1B16;
+    --ink-soft: #4A443A;
+    --accent: #C9822E;
+    --accent-2: #2F6C63;
+    --muted: #7A7466;
+    --line: rgba(30,27,22,0.14);
+    --text-on-bg: #1E1B16;
   }
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background: radial-gradient(ellipse at top, var(--bg-2), var(--bg) 60%);
-    color: var(--card);
+    color: var(--text-on-bg);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
     padding: 48px 20px 80px;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
-  .wrap{ max-width: 780px; margin: 0 auto; }
+  .wrap{ max-width: 780px; margin: 0 auto; position: relative; }
+
+  .theme-toggle{
+    position: absolute;
+    top: -8px;
+    right: 0;
+    background: transparent;
+    border: 1.5px solid var(--line);
+    color: var(--text-on-bg);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 16px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .theme-toggle:hover{ border-color: var(--accent); }
 
   .eyebrow{
     font-family: 'IBM Plex Mono', monospace;
@@ -55,8 +92,8 @@
   }
   h1 em{ font-style: italic; font-weight: 600; color: var(--accent); }
 
-  .lede{ color: #D8D2C4; font-size: 16px; line-height: 1.6; max-width: 58ch; margin: 0 0 40px; }
-  .lede b{ color: var(--card); font-weight: 600; }
+  .lede{ color: var(--text-on-bg); opacity: 0.82; font-size: 16px; line-height: 1.6; max-width: 58ch; margin: 0 0 40px; }
+  .lede b{ color: var(--text-on-bg); opacity: 1; font-weight: 600; }
 
   .card{
     background: var(--card);
@@ -65,7 +102,10 @@
     padding: 28px;
     margin-bottom: 24px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    animation: fadeInUp 0.4s ease;
   }
+  @keyframes fadeInUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
 
   .card h2{ font-family:'Fraunces', serif; font-weight: 600; font-size: 20px; margin: 0 0 4px; }
   .card .sub{
@@ -74,19 +114,13 @@
     color: var(--muted); margin: 0 0 20px;
   }
 
-  /* Tabs for connection method */
   .tabs{ display:flex; gap:6px; margin-bottom: 22px; border-bottom: 1.5px solid var(--line); }
   .tab{
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.04em;
+    font-size: 12px; letter-spacing: 0.04em;
     padding: 10px 4px 12px;
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1.5px;
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px;
   }
   .tab.active{ color: var(--ink); border-bottom-color: var(--accent-2); font-weight: 600; }
   .tab-panel{ display:none; }
@@ -106,6 +140,7 @@
     margin-bottom: 18px;
   }
   input:focus-visible{ outline: 2px solid var(--accent-2); outline-offset: 1px; }
+  .hint{ font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin: -12px 0 18px; }
 
   details{ margin: -6px 0 20px; font-size: 13px; }
   details summary{ cursor: pointer; color: var(--accent-2); font-weight: 600; list-style: none; }
@@ -115,68 +150,93 @@
   details ol{ margin: 10px 0 0; padding-left: 20px; color: var(--ink-soft); line-height: 1.7; }
   details a{ color: var(--accent-2); }
 
-  .signin-box{
-    border: 1.5px dashed var(--line);
-    border-radius: 4px;
-    padding: 18px;
-    margin-bottom: 18px;
-    text-align: center;
-  }
+  .signin-box{ border: 1.5px dashed var(--line); border-radius: 4px; padding: 18px; margin-bottom: 18px; text-align: center; }
   #googleSigninBtn{ display:flex; justify-content:center; margin-top: 8px; }
-  .signed-in-as{
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 12.5px;
-    color: var(--accent-2);
-    font-weight: 600;
-  }
+  .signed-in-as{ font-family:'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--accent-2); font-weight: 600; }
 
   button{
-    font-family: 'Inter', sans-serif;
-    font-weight: 600; font-size: 14px;
-    padding: 13px 22px; border-radius: 3px; border: none;
-    cursor: pointer;
-    transition: transform 0.1s ease, opacity 0.15s ease;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    padding: 13px 22px; border-radius: 3px; border: none; cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease, background 0.15s ease;
   }
   button:focus-visible{ outline: 2px solid var(--accent-2); outline-offset: 2px; }
   button:active{ transform: scale(0.98); }
   button:disabled{ opacity: 0.5; cursor: not-allowed; }
 
   .btn-primary{ background: var(--ink); color: var(--card); width: 100%; }
-  .btn-primary:hover:not(:disabled){ background: #322C24; }
+  .btn-primary:hover:not(:disabled){ opacity: 0.88; }
 
-  .status{ font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin-top: 14px; color: var(--ink-soft); white-space: pre-wrap; }
+  .status{ font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin-top: 14px; color: var(--ink-soft); white-space: pre-wrap; display:flex; align-items:center; gap:8px; }
   .status.error{ color: var(--danger); }
 
-  .manifest-head{ display:flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .spinner{
+    display:inline-block; width:13px; height:13px;
+    border: 2px solid var(--line); border-top-color: var(--accent-2);
+    border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink:0;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  .manifest-head{ display:flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
   .manifest-count{ font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
 
+  .manifest-stats{
+    font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+    margin-bottom: 18px; line-height: 1.6;
+  }
+
+  .toolbar{ display:flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
+  #searchBox{ margin-bottom: 0; }
+  .sort-buttons{ display:flex; gap:6px; flex-wrap: wrap; }
+  .sort-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.02em;
+    background: transparent; border: 1.5px solid var(--line); color: var(--ink-soft);
+    padding: 7px 12px; border-radius: 20px;
+  }
+  .sort-btn.active{ background: var(--ink); color: var(--card); border-color: var(--ink); }
+
+  .track-list{ margin-top: 14px; animation: fadeIn 0.3s ease; }
   .track-row{ display:flex; align-items: baseline; gap: 10px; padding: 13px 0; border-bottom: 1px solid var(--line); }
   .track-row:last-child{ border-bottom: none; }
   .track-num{ font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent-2); min-width: 30px; flex-shrink: 0; }
   .track-main{ flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .track-title{ font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .track-channel{ font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .dup-badge{
+    font-family:'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.05em;
+    background: var(--danger); color: #fff; padding: 2px 6px; border-radius: 2px;
+    margin-left: 8px; vertical-align: middle;
+  }
   .leader{ flex: 1; border-bottom: 2px dotted var(--line); height: 0.6em; min-width: 16px; }
   .track-duration{ font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--ink-soft); flex-shrink: 0; }
+  .no-results{ font-family:'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); padding: 24px 0; text-align:center; }
 
   .exports{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; padding-top: 22px; border-top: 1.5px solid var(--line); }
   .btn-export{ background: transparent; border: 1.5px solid var(--ink); color: var(--ink); flex: 1; min-width: 140px; }
   .btn-export:hover:not(:disabled){ background: var(--ink); color: var(--card); }
 
-  .note{
+  .footer{
     font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
-    line-height: 1.6; margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(250,244,230,0.15);
+    line-height: 1.6; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line);
+    text-align: center;
+  }
+  .footer a{ color: var(--accent-2); }
+  .footer-tagline{
+    font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+    text-align: center; margin-top: 10px; opacity: 0.75;
   }
 
   @media (max-width: 560px){
     .card{ padding: 20px; }
     .track-channel{ white-space: normal; }
     .exports{ flex-direction: column; }
+    .theme-toggle{ position: static; margin-bottom: 16px; }
   }
 </style>
 </head>
-<body>
+<body data-theme="dark">
 <div class="wrap">
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">🌙</button>
 
   <div class="eyebrow">No files downloaded · metadata only</div>
   <h1>Catalog the <em>whole</em> playlist,<br>skip the download.</h1>
@@ -213,14 +273,12 @@
         <ol>
           <li>In the same <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Credentials</a> page, click <b>Create Credentials → OAuth client ID</b>.</li>
           <li>Application type: <b>Web application</b>.</li>
-          <li>Under <b>Authorized JavaScript origins</b>, add your deployed site's URL (e.g. <code>https://your-app.vercel.app</code>) and <code>http://localhost:3000</code> for testing.</li>
+          <li>Under <b>Authorized JavaScript origins</b>, add your deployed site's URL and <code>http://localhost:3000</code> for testing.</li>
           <li>Copy the Client ID and paste it in the field below.</li>
-          <li>You may also need to configure the <b>OAuth consent screen</b> (External, add yourself as a test user) if Google prompts for it.</li>
         </ol>
       </details>
       <label for="clientid">Google OAuth Client ID</label>
       <input type="text" id="clientid" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
-
       <div class="signin-box">
         <div id="googleSigninBtn"></div>
         <div class="signed-in-as" id="signedInAs"></div>
@@ -230,6 +288,7 @@
     <h2 style="margin-top: 8px;">2. Paste the playlist link</h2>
     <label for="playlisturl">Playlist URL</label>
     <input type="text" id="playlisturl" placeholder="https://www.youtube.com/playlist?list=...">
+    <div class="hint" id="lastPlaylistHint" style="display:none;"></div>
 
     <button class="btn-primary" id="fetchBtn">Build manifest</button>
     <div class="status" id="status"></div>
@@ -240,7 +299,19 @@
       <h2 id="resultsTitle">Manifest</h2>
       <span class="manifest-count" id="resultsCount"></span>
     </div>
-    <div id="trackList"></div>
+    <div class="manifest-stats" id="manifestStats"></div>
+
+    <div class="toolbar">
+      <input type="text" id="searchBox" placeholder="Search titles or channels…">
+      <div class="sort-buttons">
+        <button class="sort-btn active" data-sort="original">Playlist order</button>
+        <button class="sort-btn" data-sort="title">Title A–Z</button>
+        <button class="sort-btn" data-sort="channel">Channel A–Z</button>
+        <button class="sort-btn" data-sort="duration">Longest first</button>
+      </div>
+    </div>
+
+    <div class="track-list" id="trackList"></div>
 
     <div class="exports">
       <button class="btn-export" id="exportTxt">↓ Title + channel (.txt)</button>
@@ -249,15 +320,52 @@
     </div>
   </div>
 
-  <p class="note">Made by <a href="https://visualixe-foundation.vercel.app" target="_blank" rel="noopener" style="color: var(--accent-2);">Visualixe Foundation</a></p>
+  <p class="footer">© 2026 <a href="https://visualixe-foundation.vercel.app" target="_blank" rel="noopener">Visualixe Foundation</a>. All rights reserved.<span id="visitCount"></span></p>
+  <p class="footer-tagline">Built with purpose</p>
 </div>
 
 <script>
 const SHARED_API_KEY = "AIzaSyCrpOmxL4KJQR1SDRWf-m-3h6pqpqmDFas";
 let currentTracks = [];
 let currentPlaylistTitle = "playlist";
+let skippedCount = 0;
 let oauthToken = null;
-let activeMode = 'key'; // 'key' | 'oauth'
+let activeMode = 'key';
+let sortMode = 'original';
+let searchQuery = '';
+
+// ---- Theme ----
+function applyTheme(theme){
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('manifestTheme', theme);
+  document.getElementById('themeToggle').textContent = theme === 'light' ? '🌙' : '☀️';
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.body.getAttribute('data-theme');
+  applyTheme(current === 'light' ? 'dark' : 'light');
+});
+applyTheme(localStorage.getItem('manifestTheme') || 'dark');
+
+// ---- Remember last playlist ----
+window.addEventListener('DOMContentLoaded', () => {
+  const last = localStorage.getItem('manifestLastPlaylist');
+  if(last){
+    document.getElementById('playlisturl').value = last;
+    const hint = document.getElementById('lastPlaylistHint');
+    hint.style.display = 'block';
+    hint.textContent = '↺ Loaded your last playlist link — click Build manifest to refresh it.';
+  }
+});
+
+// ---- Visit counter (best-effort, silent on failure) ----
+fetch('https://api.countapi.xyz/hit/visualixe-foundation-manifest/visits')
+  .then(r => r.json())
+  .then(d => {
+    if(d && d.value){
+      document.getElementById('visitCount').textContent = ' · ' + d.value.toLocaleString() + ' visits';
+    }
+  })
+  .catch(() => {});
 
 // ---- Tabs ----
 document.querySelectorAll('.tab').forEach(tab => {
@@ -270,7 +378,7 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ---- Google Sign-in (for private playlists) ----
+// ---- Google Sign-in ----
 let tokenClient = null;
 function initGoogleSignIn(){
   const clientId = document.getElementById('clientid').value.trim();
@@ -288,11 +396,8 @@ function initGoogleSignIn(){
 }
 document.getElementById('googleSigninBtn').addEventListener('click', () => {
   initGoogleSignIn();
-  if(tokenClient){
-    tokenClient.requestAccessToken();
-  } else {
-    setStatus('Enter the OAuth Client ID above first.', true);
-  }
+  if(tokenClient){ tokenClient.requestAccessToken(); }
+  else { setStatus('Enter the OAuth Client ID above first.', true); }
 });
 
 function extractPlaylistId(input){
@@ -305,18 +410,39 @@ function extractPlaylistId(input){
 
 function parseISODuration(iso){
   const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if(!m) return "—";
+  if(!m) return { text: "—", seconds: 0 };
   const h = parseInt(m[1]||0), min = parseInt(m[2]||0), s = parseInt(m[3]||0);
+  const totalSeconds = h*3600 + min*60 + s;
   const totalMin = h*60+min;
-  return h > 0
+  const text = h > 0
     ? `${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`
     : `${totalMin}:${String(s).padStart(2,'0')}`;
+  return { text, seconds: totalSeconds };
 }
 
-function setStatus(msg, isError){
+function formatRuntime(totalSeconds){
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function setStatus(msg, isError, loading){
   const el = document.getElementById('status');
-  el.textContent = msg;
+  el.innerHTML = (loading ? '<span class="spinner"></span>' : '') + `<span>${escapeHtml(msg)}</span>`;
   el.className = 'status' + (isError ? ' error' : '');
+}
+
+// ---- Networking with retry ----
+async function fetchWithRetry(url, options, retries=2, delay=700){
+  for(let attempt=0; attempt<=retries; attempt++){
+    try{
+      const res = await fetch(url, options);
+      if(res.ok || res.status < 500 || attempt === retries) return res;
+    } catch(e){
+      if(attempt === retries) throw e;
+    }
+    await new Promise(r => setTimeout(r, delay * (attempt+1)));
+  }
 }
 
 function authedUrl(baseUrl, apiKey){
@@ -327,12 +453,13 @@ function authedFetch(url){
   if(oauthToken && activeMode === 'oauth'){
     opts.headers = { 'Authorization': `Bearer ${oauthToken}` };
   }
-  return fetch(url, opts);
+  return fetchWithRetry(url, opts);
 }
 
-async function fetchAllPlaylistItems(apiKey, playlistId){
+async function fetchAllPlaylistItems(apiKey, playlistId, onProgress){
   let items = [];
   let pageToken = '';
+  let skipped = 0;
 
   do {
     const base = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${encodeURIComponent(playlistId)}${pageToken ? '&pageToken='+pageToken : ''}`;
@@ -344,7 +471,7 @@ async function fetchAllPlaylistItems(apiKey, playlistId){
     }
     for(const item of data.items){
       const s = item.snippet;
-      if(s.title === 'Deleted video' || s.title === 'Private video') continue;
+      if(s.title === 'Deleted video' || s.title === 'Private video'){ skipped++; continue; }
       items.push({
         position: s.position + 1,
         title: s.title,
@@ -353,9 +480,10 @@ async function fetchAllPlaylistItems(apiKey, playlistId){
       });
     }
     pageToken = data.nextPageToken || '';
+    if(onProgress) onProgress(items.length);
   } while(pageToken);
 
-  return items;
+  return { items, skipped };
 }
 
 async function fetchPlaylistTitle(apiKey, playlistId){
@@ -387,19 +515,64 @@ async function fetchDurations(apiKey, videoIds){
   return durations;
 }
 
-function renderTracks(tracks, playlistTitle){
-  document.getElementById('resultsTitle').textContent = playlistTitle || 'Manifest';
-  document.getElementById('resultsCount').textContent = `${tracks.length} track${tracks.length===1?'':'s'}`;
+function markDuplicates(tracks){
+  const idCount = {}, titleCount = {};
+  tracks.forEach(t => {
+    idCount[t.videoId] = (idCount[t.videoId]||0) + 1;
+    const key = t.title.trim().toLowerCase() + '|' + t.channelTitle.trim().toLowerCase();
+    titleCount[key] = (titleCount[key]||0) + 1;
+  });
+  tracks.forEach(t => {
+    const key = t.title.trim().toLowerCase() + '|' + t.channelTitle.trim().toLowerCase();
+    t.isDuplicate = idCount[t.videoId] > 1 || titleCount[key] > 1;
+  });
+}
 
+function getDisplayedTracks(){
+  let list = [...currentTracks];
+  if(sortMode === 'title') list.sort((a,b) => a.title.localeCompare(b.title));
+  else if(sortMode === 'channel') list.sort((a,b) => a.channelTitle.localeCompare(b.channelTitle));
+  else if(sortMode === 'duration') list.sort((a,b) => b.durationSeconds - a.durationSeconds);
+  else list.sort((a,b) => a.position - b.position);
+
+  if(searchQuery){
+    const q = searchQuery.toLowerCase();
+    list = list.filter(t => t.title.toLowerCase().includes(q) || t.channelTitle.toLowerCase().includes(q));
+  }
+  return list;
+}
+
+function refreshDisplay(){
+  renderTracks(getDisplayedTracks());
+  updateStats();
+}
+
+function updateStats(){
+  const totalSeconds = currentTracks.reduce((sum,t) => sum + (t.durationSeconds||0), 0);
+  const dupCount = currentTracks.filter(t => t.isDuplicate).length;
+  const parts = [`⏱ ${formatRuntime(totalSeconds)} total runtime`];
+  if(dupCount > 0) parts.push(`⚠ ${dupCount} duplicate${dupCount!==1?'s':''} flagged`);
+  if(skippedCount > 0) parts.push(`${skippedCount} unavailable video${skippedCount!==1?'s':''} skipped`);
+  document.getElementById('manifestStats').textContent = parts.join('   •   ');
+}
+
+function renderTracks(tracks){
+  document.getElementById('resultsCount').textContent = `${currentTracks.length} track${currentTracks.length===1?'':'s'}`;
   const list = document.getElementById('trackList');
   list.innerHTML = '';
+
+  if(tracks.length === 0){
+    list.innerHTML = '<div class="no-results">No tracks match your search.</div>';
+    return;
+  }
+
   for(const t of tracks){
     const row = document.createElement('div');
     row.className = 'track-row';
     row.innerHTML = `
       <span class="track-num">${String(t.position).padStart(3,'0')}</span>
       <div class="track-main">
-        <span class="track-title">${escapeHtml(t.title)}</span>
+        <span class="track-title">${escapeHtml(t.title)}${t.isDuplicate ? '<span class="dup-badge">DUPLICATE</span>' : ''}</span>
         <span class="track-channel">${escapeHtml(t.channelTitle)}</span>
       </div>
       <span class="leader"></span>
@@ -407,7 +580,6 @@ function renderTracks(tracks, playlistTitle){
     `;
     list.appendChild(row);
   }
-  document.getElementById('resultsCard').style.display = 'block';
 }
 
 function escapeHtml(str){
@@ -420,11 +592,8 @@ function downloadBlob(content, filename, type){
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
@@ -437,11 +606,9 @@ function toCsv(tracks){
   ].join(','));
   return [header, ...rows].join('\n');
 }
-
 function toTxt(tracks){
   return tracks.map(t => `${t.title} — ${t.channelTitle}`).join('\n');
 }
-
 function toSpotifyLinks(tracks){
   return tracks.map(t => {
     const query = encodeURIComponent(`${t.title} ${t.channelTitle}`);
@@ -449,6 +616,23 @@ function toSpotifyLinks(tracks){
   }).join('\n');
 }
 
+// ---- Sort buttons ----
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    sortMode = btn.dataset.sort;
+    refreshDisplay();
+  });
+});
+
+// ---- Search ----
+document.getElementById('searchBox').addEventListener('input', (e) => {
+  searchQuery = e.target.value.trim();
+  refreshDisplay();
+});
+
+// ---- Build manifest ----
 document.getElementById('fetchBtn').addEventListener('click', async () => {
   const apiKey = document.getElementById('apikey').value.trim() || SHARED_API_KEY;
   const playlistUrl = document.getElementById('playlisturl').value.trim();
@@ -462,45 +646,63 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
 
   btn.disabled = true;
   document.getElementById('resultsCard').style.display = 'none';
-  setStatus('Fetching tracklist…', false);
+  setStatus('Fetching tracklist…', false, true);
 
   try{
-    const [items, playlistTitle] = await Promise.all([
-      fetchAllPlaylistItems(apiKey, playlistId),
+    const [playlistResult, playlistTitle] = await Promise.all([
+      fetchAllPlaylistItems(apiKey, playlistId, (count) => setStatus(`Fetching tracklist… ${count} found so far`, false, true)),
       fetchPlaylistTitle(apiKey, playlistId)
     ]);
+    const { items, skipped } = playlistResult;
+    skippedCount = skipped;
 
     if(items.length === 0){
-      setStatus('No accessible videos found in that playlist. If it\'s private, make sure you signed in with the owning account.', true);
+      setStatus('No accessible videos found in that playlist. If it\'s private, make sure you signed in with the owning account.', true, false);
       btn.disabled = false;
       return;
     }
 
-    setStatus(`Found ${items.length} tracks. Fetching durations…`, false);
+    setStatus(`Found ${items.length} tracks. Fetching durations…`, false, true);
     const videoIds = items.map(i => i.videoId).filter(Boolean);
     const durations = await fetchDurations(apiKey, videoIds);
 
-    const tracks = items.map(i => ({ ...i, duration: durations[i.videoId] || '—' }));
+    const tracks = items.map(i => {
+      const d = durations[i.videoId] || { text: '—', seconds: 0 };
+      return { ...i, duration: d.text, durationSeconds: d.seconds };
+    });
+    markDuplicates(tracks);
+
     currentTracks = tracks;
     currentPlaylistTitle = playlistTitle || 'playlist';
+    sortMode = 'original';
+    searchQuery = '';
+    document.getElementById('searchBox').value = '';
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === 'original'));
 
-    renderTracks(tracks, playlistTitle);
-    setStatus(`Done — ${tracks.length} tracks catalogued.`, false);
+    document.getElementById('resultsTitle').textContent = playlistTitle || 'Manifest';
+    document.getElementById('resultsCard').style.display = 'block';
+    refreshDisplay();
+
+    localStorage.setItem('manifestLastPlaylist', playlistUrl);
+    document.getElementById('lastPlaylistHint').style.display = 'none';
+
+    const skipMsg = skippedCount > 0 ? ` (${skippedCount} unavailable skipped)` : '';
+    setStatus(`Done — ${tracks.length} tracks catalogued${skipMsg}.`, false, false);
   } catch(err){
-    setStatus('Error: ' + err.message, true);
+    setStatus('Error: ' + err.message, true, false);
   } finally {
     btn.disabled = false;
   }
 });
 
 document.getElementById('exportTxt').addEventListener('click', () => {
-  downloadBlob(toTxt(currentTracks), `${currentPlaylistTitle}.txt`, 'text/plain');
+  downloadBlob(toTxt(getDisplayedTracks()), `${currentPlaylistTitle}.txt`, 'text/plain');
 });
 document.getElementById('exportCsv').addEventListener('click', () => {
-  downloadBlob(toCsv(currentTracks), `${currentPlaylistTitle}.csv`, 'text/csv');
+  downloadBlob(toCsv(getDisplayedTracks()), `${currentPlaylistTitle}.csv`, 'text/csv');
 });
 document.getElementById('exportSpotify').addEventListener('click', () => {
-  downloadBlob(toSpotifyLinks(currentTracks), `${currentPlaylistTitle}_spotify_search.txt`, 'text/plain');
+  downloadBlob(toSpotifyLinks(getDisplayedTracks()), `${currentPlaylistTitle}_spotify_search.txt`, 'text/plain');
 });
 </script>
 </body>
