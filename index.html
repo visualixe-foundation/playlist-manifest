@@ -141,6 +141,14 @@
   }
   input:focus-visible{ outline: 2px solid var(--accent-2); outline-offset: 1px; }
   .hint{ font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin: -12px 0 18px; }
+  .history-chips{ display:flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .history-chip{
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px;
+    background: transparent; border: 1px solid var(--line); color: var(--muted);
+    padding: 5px 10px; border-radius: 20px; max-width: 220px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .history-chip:hover{ border-color: var(--accent-2); color: var(--ink); }
 
   details{ margin: -6px 0 20px; font-size: 13px; }
   details summary{ cursor: pointer; color: var(--accent-2); font-weight: 600; list-style: none; }
@@ -187,6 +195,13 @@
   .toolbar{ display:flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
   #searchBox{ margin-bottom: 0; }
   .sort-buttons{ display:flex; gap:6px; flex-wrap: wrap; }
+  .select-row{ display:flex; justify-content: flex-end; }
+  .select-all-label{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+  }
+  .select-all-label input{ width:14px; height:14px; accent-color: var(--accent-2); cursor:pointer; }
+  .track-checkbox{ width:15px; height:15px; accent-color: var(--accent-2); cursor:pointer; flex-shrink:0; align-self:center; }
   .sort-btn{
     font-family:'IBM Plex Mono', monospace;
     font-size: 11px; letter-spacing: 0.02em;
@@ -221,10 +236,6 @@
     text-align: center;
   }
   .footer a{ color: var(--accent-2); }
-  .footer-tagline{
-    font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
-    text-align: center; margin-top: 10px; opacity: 0.75;
-  }
 
   @media (max-width: 560px){
     .card{ padding: 20px; }
@@ -286,6 +297,7 @@
     </div>
 
     <h2 style="margin-top: 8px;">2. Paste the playlist link</h2>
+    <div class="history-chips" id="historyChips" style="display:none;"></div>
     <label for="playlisturl">Playlist URL</label>
     <input type="text" id="playlisturl" placeholder="https://www.youtube.com/playlist?list=...">
     <div class="hint" id="lastPlaylistHint" style="display:none;"></div>
@@ -309,19 +321,23 @@
         <button class="sort-btn" data-sort="channel">Channel A–Z</button>
         <button class="sort-btn" data-sort="duration">Longest first</button>
       </div>
+      <div class="select-row">
+        <label class="select-all-label">
+          <input type="checkbox" id="selectAllBox" checked>
+          <span id="selectedCount">586 of 586 selected</span>
+        </label>
+      </div>
     </div>
 
     <div class="track-list" id="trackList"></div>
 
     <div class="exports">
-      <button class="btn-export" id="exportTxt">↓ Title + channel (.txt)</button>
-      <button class="btn-export" id="exportCsv">↓ Spreadsheet (.csv)</button>
+      <button class="btn-export" id="exportTxt">↓ Selected titles (.txt)</button>
       <button class="btn-export" id="exportSpotify">↓ Spotify search links</button>
     </div>
   </div>
 
-  <p class="footer">© 2026 <a href="https://visualixe-foundation.vercel.app" target="_blank" rel="noopener">Visualixe Foundation</a>. All rights reserved.<span id="visitCount"></span></p>
-  <p class="footer-tagline">Built with purpose</p>
+  <p class="footer">Reads public or authorized metadata via YouTube's official Data API only — no audio or video is ever downloaded.<span id="visitCount"></span></p>
 </div>
 
 <script>
@@ -333,6 +349,7 @@ let oauthToken = null;
 let activeMode = 'key';
 let sortMode = 'original';
 let searchQuery = '';
+let selectedIds = new Set();
 
 // ---- Theme ----
 function applyTheme(theme){
@@ -346,6 +363,33 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 });
 applyTheme(localStorage.getItem('manifestTheme') || 'dark');
 
+// ---- Playlist history (local, last 8) ----
+function getHistory(){
+  try{ return JSON.parse(localStorage.getItem('manifestHistory') || '[]'); }
+  catch(e){ return []; }
+}
+function saveToHistory(url, title){
+  let history = getHistory().filter(h => h.url !== url);
+  history.unshift({ url, title: title || url, date: Date.now() });
+  history = history.slice(0, 8);
+  localStorage.setItem('manifestHistory', JSON.stringify(history));
+  renderHistory();
+}
+function renderHistory(){
+  const container = document.getElementById('historyChips');
+  const history = getHistory();
+  if(history.length === 0){ container.style.display = 'none'; return; }
+  container.style.display = 'flex';
+  container.innerHTML = history.map(h =>
+    `<button type="button" class="history-chip" data-url="${escapeHtml(h.url)}">${escapeHtml(h.title)}</button>`
+  ).join('');
+  container.querySelectorAll('.history-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.getElementById('playlisturl').value = chip.dataset.url;
+    });
+  });
+}
+
 // ---- Remember last playlist ----
 window.addEventListener('DOMContentLoaded', () => {
   const last = localStorage.getItem('manifestLastPlaylist');
@@ -355,6 +399,7 @@ window.addEventListener('DOMContentLoaded', () => {
     hint.style.display = 'block';
     hint.textContent = '↺ Loaded your last playlist link — click Build manifest to refresh it.';
   }
+  renderHistory();
 });
 
 // ---- Visit counter (best-effort, silent on failure) ----
@@ -545,6 +590,18 @@ function getDisplayedTracks(){
 function refreshDisplay(){
   renderTracks(getDisplayedTracks());
   updateStats();
+  updateSelectedCount();
+}
+
+function getSelectedTracks(){
+  return getDisplayedTracks().filter(t => selectedIds.has(t.videoId));
+}
+
+function updateSelectedCount(){
+  const el = document.getElementById('selectedCount');
+  if(el) el.textContent = `${selectedIds.size} of ${currentTracks.length} selected`;
+  const selectAllBox = document.getElementById('selectAllBox');
+  if(selectAllBox) selectAllBox.checked = selectedIds.size === currentTracks.length && currentTracks.length > 0;
 }
 
 function updateStats(){
@@ -570,6 +627,7 @@ function renderTracks(tracks){
     const row = document.createElement('div');
     row.className = 'track-row';
     row.innerHTML = `
+      <input type="checkbox" class="track-checkbox" data-id="${escapeHtml(t.videoId)}" ${selectedIds.has(t.videoId) ? 'checked' : ''}>
       <span class="track-num">${String(t.position).padStart(3,'0')}</span>
       <div class="track-main">
         <span class="track-title">${escapeHtml(t.title)}${t.isDuplicate ? '<span class="dup-badge">DUPLICATE</span>' : ''}</span>
@@ -581,6 +639,24 @@ function renderTracks(tracks){
     list.appendChild(row);
   }
 }
+
+document.getElementById('trackList').addEventListener('change', (e) => {
+  if(e.target.classList.contains('track-checkbox')){
+    const id = e.target.dataset.id;
+    if(e.target.checked) selectedIds.add(id);
+    else selectedIds.delete(id);
+    updateSelectedCount();
+  }
+});
+
+document.getElementById('selectAllBox').addEventListener('change', (e) => {
+  if(e.target.checked){
+    currentTracks.forEach(t => selectedIds.add(t.videoId));
+  } else {
+    selectedIds.clear();
+  }
+  refreshDisplay();
+});
 
 function escapeHtml(str){
   const div = document.createElement('div');
@@ -597,17 +673,8 @@ function downloadBlob(content, filename, type){
   URL.revokeObjectURL(url);
 }
 
-function toCsv(tracks){
-  const esc = (s) => `"${String(s).replace(/"/g,'""')}"`;
-  const header = ['#','Title','Channel','Duration','URL'].join(',');
-  const rows = tracks.map(t => [
-    t.position, esc(t.title), esc(t.channelTitle), t.duration,
-    `https://www.youtube.com/watch?v=${t.videoId}`
-  ].join(','));
-  return [header, ...rows].join('\n');
-}
 function toTxt(tracks){
-  return tracks.map(t => `${t.title} — ${t.channelTitle}`).join('\n');
+  return tracks.map(t => t.title).join('\n\n');
 }
 function toSpotifyLinks(tracks){
   return tracks.map(t => {
@@ -673,6 +740,7 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
     markDuplicates(tracks);
 
     currentTracks = tracks;
+    selectedIds = new Set(tracks.map(t => t.videoId));
     currentPlaylistTitle = playlistTitle || 'playlist';
     sortMode = 'original';
     searchQuery = '';
@@ -684,6 +752,7 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
     refreshDisplay();
 
     localStorage.setItem('manifestLastPlaylist', playlistUrl);
+    saveToHistory(playlistUrl, playlistTitle || 'Untitled playlist');
     document.getElementById('lastPlaylistHint').style.display = 'none';
 
     const skipMsg = skippedCount > 0 ? ` (${skippedCount} unavailable skipped)` : '';
@@ -696,13 +765,14 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
 });
 
 document.getElementById('exportTxt').addEventListener('click', () => {
-  downloadBlob(toTxt(getDisplayedTracks()), `${currentPlaylistTitle}.txt`, 'text/plain');
-});
-document.getElementById('exportCsv').addEventListener('click', () => {
-  downloadBlob(toCsv(getDisplayedTracks()), `${currentPlaylistTitle}.csv`, 'text/csv');
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to export.', true, false); return; }
+  downloadBlob(toTxt(selected), `${currentPlaylistTitle}.txt`, 'text/plain');
 });
 document.getElementById('exportSpotify').addEventListener('click', () => {
-  downloadBlob(toSpotifyLinks(getDisplayedTracks()), `${currentPlaylistTitle}_spotify_search.txt`, 'text/plain');
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to export.', true, false); return; }
+  downloadBlob(toSpotifyLinks(selected), `${currentPlaylistTitle}_spotify_search.txt`, 'text/plain');
 });
 </script>
 </body>
