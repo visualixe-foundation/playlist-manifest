@@ -376,15 +376,8 @@
 <script>
 const SHARED_API_KEY = "AIzaSyCrpOmxL4KJQR1SDRWf-m-3h6pqpqmDFas";
 
-// ─────────────────────────────────────────────────────────────
-// SITE OWNER — one-time setup (users never see this)
-// 1. Go to https://console.cloud.google.com/apis/credentials
-// 2. Create Credentials → OAuth client ID → Web application
-// 3. Under Authorized JavaScript origins add:
-//    https://playlist-manifest.vercel.app
-// 4. Paste the Client ID below (replace the placeholder)
-// ─────────────────────────────────────────────────────────────
-const OAUTH_CLIENT_ID = "YOUR_CLIENT_ID_HERE.apps.googleusercontent.com";
+// OAuth Client ID for Private playlist support
+const OAUTH_CLIENT_ID = "197770264166-4jmgvh9hbo8tjeb720sp0sopqlv3ob6u.apps.googleusercontent.com";
 
 let currentTracks = [];
 let currentPlaylistTitle = "playlist";
@@ -470,7 +463,7 @@ document.querySelectorAll('.tab').forEach(tab => {
 // ---- Google Sign-in ----
 let tokenClient = null;
 function initGoogleSignIn(){
-  if(!OAUTH_CLIENT_ID || OAUTH_CLIENT_ID.includes('YOUR_CLIENT_ID_HERE') || typeof google === 'undefined') return false;
+  if(!OAUTH_CLIENT_ID || typeof google === 'undefined') return false;
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: OAUTH_CLIENT_ID,
     scope: 'https://www.googleapis.com/auth/youtube.readonly',
@@ -486,7 +479,7 @@ function initGoogleSignIn(){
 }
 document.getElementById('googleSigninBtn').addEventListener('click', () => {
   if(!initGoogleSignIn()){
-    setStatus('Private playlists are not available yet — the site owner still needs to finish the one-time Google setup.', true);
+    setStatus('Google Sign-In is not ready yet. Please try again in a moment.', true);
     return;
   }
   if(tokenClient) tokenClient.requestAccessToken();
