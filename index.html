@@ -39,7 +39,6 @@
     --line: rgba(30,27,22,0.14);
     --text-on-bg: #1E1B16;
   }
-
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -50,94 +49,53 @@
     padding: 48px 20px 80px;
     transition: background 0.25s ease, color 0.25s ease;
   }
-
   .wrap{ max-width: 780px; margin: 0 auto; position: relative; }
-
   .theme-toggle{
-    position: absolute;
-    top: -8px;
-    right: 0;
-    background: transparent;
-    border: 1.5px solid var(--line);
-    color: var(--text-on-bg);
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    font-size: 16px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; top: -8px; right: 0;
+    background: transparent; border: 1.5px solid var(--line);
+    color: var(--text-on-bg); width: 38px; height: 38px;
+    border-radius: 50%; font-size: 16px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
   }
   .theme-toggle:hover{ border-color: var(--accent); }
-
   .eyebrow{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 14px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 14px;
     display:flex; align-items:center; gap:10px;
   }
   .eyebrow::before{ content:""; width:22px; height:1px; background: var(--accent); }
-
   h1{
-    font-family:'Fraunces', serif;
-    font-weight: 900;
-    font-size: clamp(34px, 6vw, 54px);
-    line-height: 1.02;
-    margin: 0 0 16px;
-    letter-spacing: -0.01em;
+    font-family:'Fraunces', serif; font-weight: 900;
+    font-size: clamp(34px, 6vw, 54px); line-height: 1.02;
+    margin: 0 0 16px; letter-spacing: -0.01em;
   }
   h1 em{ font-style: italic; font-weight: 600; color: var(--accent); }
-
   .lede{ color: var(--text-on-bg); opacity: 0.82; font-size: 16px; line-height: 1.6; max-width: 58ch; margin: 0 0 40px; }
   .lede b{ color: var(--text-on-bg); opacity: 1; font-weight: 600; }
-
   .card{
-    background: var(--card);
-    color: var(--ink);
-    border-radius: 4px;
-    padding: 28px;
-    margin-bottom: 24px;
+    background: var(--card); color: var(--ink); border-radius: 4px;
+    padding: 28px; margin-bottom: 24px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.35);
     animation: fadeInUp 0.4s ease;
   }
   @keyframes fadeInUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
   @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
-
   .card h2{ font-family:'Fraunces', serif; font-weight: 600; font-size: 20px; margin: 0 0 4px; }
-  .card .sub{
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--muted); margin: 0 0 20px;
-  }
-
   .tabs{ display:flex; gap:6px; margin-bottom: 18px; border-bottom: 1.5px solid var(--line); }
   .tab{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px; letter-spacing: 0.04em;
-    padding: 10px 4px 12px;
-    background: none; border: none; color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.04em;
+    padding: 10px 4px 12px; background: none; border: none; color: var(--muted);
     cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px;
   }
   .tab.active{ color: var(--ink); border-bottom-color: var(--accent-2); font-weight: 600; }
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; }
-
   label{ display:block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--ink-soft); }
-
-  input[type=text], input[type=password]{
-    width: 100%;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px;
-    padding: 12px 14px;
-    border: 1.5px solid var(--line);
-    border-radius: 3px;
-    background: #fff;
-    color: var(--ink);
-    margin-bottom: 18px;
+  input[type=text]{
+    width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 14px;
+    padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 3px;
+    background: #fff; color: var(--ink); margin-bottom: 18px;
   }
   input:focus-visible{ outline: 2px solid var(--accent-2); outline-offset: 1px; }
   .hint{ font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin: -12px 0 18px; }
@@ -149,50 +107,23 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .history-chip:hover{ border-color: var(--accent-2); color: var(--ink); }
-
-  details{ margin: -6px 0 20px; font-size: 13px; }
-  details summary{ cursor: pointer; color: var(--accent-2); font-weight: 600; list-style: none; }
-  details summary::marker, details summary::-webkit-details-marker{ display:none; }
-  details summary::before{ content: "→ "; }
-  details[open] summary::before{ content: "↓ "; }
-  details ol{ margin: 10px 0 0; padding-left: 20px; color: var(--ink-soft); line-height: 1.7; }
-  details a{ color: var(--accent-2); }
-
   .signin-box{
-    border: 1.5px dashed var(--line);
-    border-radius: 4px;
-    padding: 18px;
-    margin-bottom: 18px;
-    text-align: center;
+    border: 1.5px dashed var(--line); border-radius: 4px;
+    padding: 18px; margin-bottom: 18px; text-align: center;
   }
   .btn-google{
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: #fff;
-    color: #3c4043;
-    border: 1.5px solid #dadce0;
-    padding: 11px 18px;
-    border-radius: 4px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.15s ease, box-shadow 0.15s ease;
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #fff; color: #3c4043; border: 1.5px solid #dadce0;
+    padding: 11px 18px; border-radius: 4px;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: background 0.15s ease, box-shadow 0.15s ease;
   }
-  .btn-google:hover{
-    background: #f8f9fa;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  }
+  .btn-google:hover{ background: #f8f9fa; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
   .btn-google svg{ width: 18px; height: 18px; flex-shrink: 0; }
   .signed-in-as{
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 12.5px;
-    color: var(--accent-2);
-    font-weight: 600;
-    margin-top: 10px;
+    font-family:'IBM Plex Mono', monospace; font-size: 12.5px;
+    color: var(--accent-2); font-weight: 600; margin-top: 10px;
   }
-
   button{
     font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
     padding: 13px 22px; border-radius: 3px; border: none; cursor: pointer;
@@ -201,31 +132,41 @@
   button:focus-visible{ outline: 2px solid var(--accent-2); outline-offset: 2px; }
   button:active{ transform: scale(0.98); }
   button:disabled{ opacity: 0.5; cursor: not-allowed; }
-
   .btn-primary{ background: var(--ink); color: var(--card); width: 100%; }
   .btn-primary:hover:not(:disabled){ opacity: 0.88; }
-
   .status{ font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin-top: 14px; color: var(--ink-soft); white-space: pre-wrap; display:flex; align-items:center; gap:8px; }
   .status.error{ color: var(--danger); }
-
   .spinner{
     display:inline-block; width:13px; height:13px;
     border: 2px solid var(--line); border-top-color: var(--accent-2);
     border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink:0;
   }
   @keyframes spin{ to{ transform: rotate(360deg); } }
-
-  .manifest-head{ display:flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .manifest-head{ display:flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; gap: 12px; flex-wrap: wrap; }
   .manifest-count{ font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
-
+  .yt-link{
+    font-family:'IBM Plex Mono', monospace; font-size: 12px;
+    color: var(--accent-2); text-decoration: none;
+  }
+  .yt-link:hover{ text-decoration: underline; }
   .manifest-stats{
     font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
     margin-bottom: 18px; line-height: 1.6;
   }
-
   .toolbar{ display:flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
   #searchBox{ margin-bottom: 0; }
-  .sort-buttons{ display:flex; gap:6px; flex-wrap: wrap; }
+  .sort-buttons, .filter-row{ display:flex; gap:6px; flex-wrap: wrap; align-items: center; }
+  .filter-row label{ margin: 0; font-size: 12px; font-weight: 500; }
+  .filter-row select{
+    font-family:'IBM Plex Mono', monospace; font-size: 12px;
+    padding: 6px 10px; border: 1.5px solid var(--line); border-radius: 3px;
+    background: #fff; color: var(--ink);
+  }
+  .toggle-label{
+    display:flex; align-items:center; gap:6px; cursor:pointer;
+    font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+  }
+  .toggle-label input{ width:14px; height:14px; accent-color: var(--accent-2); cursor:pointer; }
   .select-row{ display:flex; justify-content: flex-end; }
   .select-all-label{
     display:flex; align-items:center; gap:8px; cursor:pointer;
@@ -234,33 +175,38 @@
   .select-all-label input{ width:14px; height:14px; accent-color: var(--accent-2); cursor:pointer; }
   .track-checkbox{ width:15px; height:15px; accent-color: var(--accent-2); cursor:pointer; flex-shrink:0; align-self:center; }
   .sort-btn{
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 0.02em;
+    font-family:'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.02em;
     background: transparent; border: 1.5px solid var(--line); color: var(--ink-soft);
     padding: 7px 12px; border-radius: 20px;
   }
   .sort-btn.active{ background: var(--ink); color: var(--card); border-color: var(--ink); }
-
   .track-list{ margin-top: 14px; animation: fadeIn 0.3s ease; }
-  .track-row{ display:flex; align-items: baseline; gap: 10px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .track-row{ display:flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
   .track-row:last-child{ border-bottom: none; }
-  .track-num{ font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent-2); min-width: 30px; flex-shrink: 0; }
+  .track-thumb{
+    width: 64px; height: 36px; object-fit: cover; border-radius: 2px;
+    flex-shrink: 0; background: var(--line);
+  }
+  .track-num{ font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent-2); min-width: 28px; flex-shrink: 0; }
   .track-main{ flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .track-title{ font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-artist{ font-size: 12px; color: var(--accent-2); margin-top: 1px; }
   .track-channel{ font-size: 12px; color: var(--muted); margin-top: 2px; }
   .dup-badge{
     font-family:'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.05em;
     background: var(--danger); color: #fff; padding: 2px 6px; border-radius: 2px;
     margin-left: 8px; vertical-align: middle;
   }
-  .leader{ flex: 1; border-bottom: 2px dotted var(--line); height: 0.6em; min-width: 16px; }
+  .leader{ flex: 1; border-bottom: 2px dotted var(--line); height: 0.6em; min-width: 12px; }
   .track-duration{ font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--ink-soft); flex-shrink: 0; }
-  .no-results{ font-family:'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); padding: 24px 0; text-align:center; }
-
+  .no-results{ font-family:'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); padding: 24px 0; text-align:center; line-height: 1.6; }
   .exports{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; padding-top: 22px; border-top: 1.5px solid var(--line); }
-  .btn-export{ background: transparent; border: 1.5px solid var(--ink); color: var(--ink); flex: 1; min-width: 140px; }
-  .btn-export:hover:not(:disabled){ background: var(--ink); color: var(--card); }
-
+  .btn-export, .btn-copy{
+    background: transparent; border: 1.5px solid var(--ink); color: var(--ink);
+    flex: 1; min-width: 140px; font-size: 13px; padding: 12px 14px;
+  }
+  .btn-export:hover:not(:disabled), .btn-copy:hover:not(:disabled){ background: var(--ink); color: var(--card); }
+  .btn-copy.copied{ border-color: var(--accent-2); color: var(--accent-2); }
   .footer{
     font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
     line-height: 1.6; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line);
@@ -271,12 +217,12 @@
     font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
     text-align: center; margin-top: 10px; opacity: 0.75;
   }
-
   @media (max-width: 560px){
     .card{ padding: 20px; }
-    .track-channel{ white-space: normal; }
+    .track-channel, .track-artist{ white-space: normal; }
     .exports{ flex-direction: column; }
     .theme-toggle{ position: static; margin-bottom: 16px; }
+    .track-thumb{ width: 48px; height: 27px; }
   }
 </style>
 </head>
@@ -327,22 +273,43 @@
   <div class="card" id="resultsCard" style="display:none;">
     <div class="manifest-head">
       <h2 id="resultsTitle">Manifest</h2>
-      <span class="manifest-count" id="resultsCount"></span>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <a class="yt-link" id="openOnYoutube" href="#" target="_blank" rel="noopener" style="display:none;">Open on YouTube ↗</a>
+        <span class="manifest-count" id="resultsCount"></span>
+      </div>
     </div>
     <div class="manifest-stats" id="manifestStats"></div>
 
     <div class="toolbar">
-      <input type="text" id="searchBox" placeholder="Search titles or channels…">
+      <input type="text" id="searchBox" placeholder="Search titles, artists, or channels…">
       <div class="sort-buttons">
         <button class="sort-btn active" data-sort="original">Playlist order</button>
         <button class="sort-btn" data-sort="title">Title A–Z</button>
         <button class="sort-btn" data-sort="channel">Channel A–Z</button>
         <button class="sort-btn" data-sort="duration">Longest first</button>
       </div>
+      <div class="filter-row">
+        <label for="durationFilter">Duration</label>
+        <select id="durationFilter">
+          <option value="0">Any length</option>
+          <option value="60">Over 1 min</option>
+          <option value="180">Over 3 min</option>
+          <option value="300">Over 5 min</option>
+          <option value="600">Over 10 min</option>
+        </select>
+        <label class="toggle-label">
+          <input type="checkbox" id="showThumbs" checked>
+          Thumbnails
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="parseTitles" checked>
+          Parse Artist – Song
+        </label>
+      </div>
       <div class="select-row">
         <label class="select-all-label">
           <input type="checkbox" id="selectAllBox" checked>
-          <span id="selectedCount">586 of 586 selected</span>
+          <span id="selectedCount">0 of 0 selected</span>
         </label>
       </div>
     </div>
@@ -352,6 +319,8 @@
     <div class="exports">
       <button class="btn-export" id="exportTxt">↓ Selected titles (.txt)</button>
       <button class="btn-export" id="exportSpotify">↓ Spotify search links</button>
+      <button class="btn-copy" id="copyTitles">Copy titles</button>
+      <button class="btn-copy" id="copySpotify">Copy Spotify links</button>
     </div>
   </div>
 
@@ -361,17 +330,19 @@
 
 <script>
 const SHARED_API_KEY = "AIzaSyCrpOmxL4KJQR1SDRWf-m-3h6pqpqmDFas";
-
-// OAuth Client ID for Private playlist support
 const OAUTH_CLIENT_ID = "197770264166-4jmgvh9hbo8tjeb720sp0sopqlv3ob6u.apps.googleusercontent.com";
 
 let currentTracks = [];
 let currentPlaylistTitle = "playlist";
+let currentPlaylistId = null;
 let skippedCount = 0;
 let oauthToken = null;
 let activeMode = 'key';
 let sortMode = 'original';
 let searchQuery = '';
+let minDuration = 0;
+let showThumbs = true;
+let parseTitles = true;
 let selectedIds = new Set();
 
 // ---- Theme ----
@@ -386,7 +357,7 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 });
 applyTheme(localStorage.getItem('manifestTheme') || 'dark');
 
-// ---- Playlist history (local, last 8) ----
+// ---- Playlist history ----
 function getHistory(){
   try{ return JSON.parse(localStorage.getItem('manifestHistory') || '[]'); }
   catch(e){ return []; }
@@ -413,7 +384,7 @@ function renderHistory(){
   });
 }
 
-// ---- Remember last playlist ----
+// ---- Init: last playlist + last mode ----
 window.addEventListener('DOMContentLoaded', () => {
   const last = localStorage.getItem('manifestLastPlaylist');
   if(last){
@@ -423,9 +394,28 @@ window.addEventListener('DOMContentLoaded', () => {
     hint.textContent = '↺ Loaded your last playlist link — click Build manifest to refresh it.';
   }
   renderHistory();
+
+  const lastMode = localStorage.getItem('manifestLastMode');
+  if(lastMode === 'oauth'){
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="signinTab"]').classList.add('active');
+    document.getElementById('signinTab').classList.add('active');
+    activeMode = 'oauth';
+  }
+
+  const savedThumbs = localStorage.getItem('manifestShowThumbs');
+  if(savedThumbs !== null){
+    showThumbs = savedThumbs === 'true';
+    document.getElementById('showThumbs').checked = showThumbs;
+  }
+  const savedParse = localStorage.getItem('manifestParseTitles');
+  if(savedParse !== null){
+    parseTitles = savedParse === 'true';
+    document.getElementById('parseTitles').checked = parseTitles;
+  }
 });
 
-// ---- Visit counter (best-effort, silent on failure) ----
 fetch('https://api.countapi.xyz/hit/visualixe-foundation-manifest/visits')
   .then(r => r.json())
   .then(d => {
@@ -443,6 +433,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     tab.classList.add('active');
     document.getElementById(tab.dataset.tab).classList.add('active');
     activeMode = tab.dataset.tab === 'keyTab' ? 'key' : 'oauth';
+    localStorage.setItem('manifestLastMode', activeMode);
   });
 });
 
@@ -497,13 +488,28 @@ function formatRuntime(totalSeconds){
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
+function parseArtistTitle(title){
+  if(!parseTitles) return { artist: null, song: title };
+  const seps = [' - ', ' – ', ' — ', ' | '];
+  for(const sep of seps){
+    if(title.includes(sep)){
+      const parts = title.split(sep);
+      const artist = parts[0].trim();
+      const song = parts.slice(1).join(sep).trim();
+      if(artist.length > 0 && artist.length < 80 && song.length > 0){
+        return { artist, song };
+      }
+    }
+  }
+  return { artist: null, song: title };
+}
+
 function setStatus(msg, isError, loading){
   const el = document.getElementById('status');
   el.innerHTML = (loading ? '<span class="spinner"></span>' : '') + `<span>${escapeHtml(msg)}</span>`;
   el.className = 'status' + (isError ? ' error' : '');
 }
 
-// ---- Networking with retry ----
 async function fetchWithRetry(url, options, retries=2, delay=700){
   for(let attempt=0; attempt<=retries; attempt++){
     try{
@@ -543,11 +549,13 @@ async function fetchAllPlaylistItems(apiKey, playlistId, onProgress){
     for(const item of data.items){
       const s = item.snippet;
       if(s.title === 'Deleted video' || s.title === 'Private video'){ skipped++; continue; }
+      const thumb = s.thumbnails?.medium?.url || s.thumbnails?.default?.url || '';
       items.push({
         position: s.position + 1,
         title: s.title,
         channelTitle: s.videoOwnerChannelTitle || s.channelTitle || 'Unknown',
-        videoId: s.resourceId?.videoId
+        videoId: s.resourceId?.videoId,
+        thumbnail: thumb
       });
     }
     pageToken = data.nextPageToken || '';
@@ -606,9 +614,18 @@ function getDisplayedTracks(){
   else if(sortMode === 'duration') list.sort((a,b) => b.durationSeconds - a.durationSeconds);
   else list.sort((a,b) => a.position - b.position);
 
+  if(minDuration > 0){
+    list = list.filter(t => (t.durationSeconds || 0) >= minDuration);
+  }
   if(searchQuery){
     const q = searchQuery.toLowerCase();
-    list = list.filter(t => t.title.toLowerCase().includes(q) || t.channelTitle.toLowerCase().includes(q));
+    list = list.filter(t => {
+      const parsed = parseArtistTitle(t.title);
+      return t.title.toLowerCase().includes(q)
+        || t.channelTitle.toLowerCase().includes(q)
+        || (parsed.artist && parsed.artist.toLowerCase().includes(q))
+        || (parsed.song && parsed.song.toLowerCase().includes(q));
+    });
   }
   return list;
 }
@@ -617,6 +634,7 @@ function refreshDisplay(){
   renderTracks(getDisplayedTracks());
   updateStats();
   updateSelectedCount();
+  updateExportButtons();
 }
 
 function getSelectedTracks(){
@@ -628,6 +646,14 @@ function updateSelectedCount(){
   if(el) el.textContent = `${selectedIds.size} of ${currentTracks.length} selected`;
   const selectAllBox = document.getElementById('selectAllBox');
   if(selectAllBox) selectAllBox.checked = selectedIds.size === currentTracks.length && currentTracks.length > 0;
+}
+
+function updateExportButtons(){
+  const n = getSelectedTracks().length;
+  document.getElementById('exportTxt').textContent = `↓ Selected titles (${n})`;
+  document.getElementById('exportSpotify').textContent = `↓ Spotify links (${n})`;
+  document.getElementById('copyTitles').textContent = `Copy titles (${n})`;
+  document.getElementById('copySpotify').textContent = `Copy Spotify links (${n})`;
 }
 
 function updateStats(){
@@ -645,18 +671,32 @@ function renderTracks(tracks){
   list.innerHTML = '';
 
   if(tracks.length === 0){
-    list.innerHTML = '<div class="no-results">No tracks match your search.</div>';
+    if(currentTracks.length === 0){
+      list.innerHTML = '<div class="no-results">No accessible videos found.<br>If this is a private playlist, make sure you signed in with the account that owns it.</div>';
+    } else {
+      list.innerHTML = '<div class="no-results">No tracks match your search or duration filter.</div>';
+    }
     return;
   }
 
   for(const t of tracks){
+    const parsed = parseArtistTitle(t.title);
     const row = document.createElement('div');
     row.className = 'track-row';
+    const thumbHtml = showThumbs && t.thumbnail
+      ? `<img class="track-thumb" src="${escapeHtml(t.thumbnail)}" alt="" loading="lazy">`
+      : '';
+    const artistHtml = parsed.artist
+      ? `<span class="track-artist">${escapeHtml(parsed.artist)}</span>`
+      : '';
+    const titleText = parsed.artist ? parsed.song : t.title;
     row.innerHTML = `
       <input type="checkbox" class="track-checkbox" data-id="${escapeHtml(t.videoId)}" ${selectedIds.has(t.videoId) ? 'checked' : ''}>
+      ${thumbHtml}
       <span class="track-num">${String(t.position).padStart(3,'0')}</span>
       <div class="track-main">
-        <span class="track-title">${escapeHtml(t.title)}${t.isDuplicate ? '<span class="dup-badge">DUPLICATE</span>' : ''}</span>
+        <span class="track-title">${escapeHtml(titleText)}${t.isDuplicate ? '<span class="dup-badge">DUPLICATE</span>' : ''}</span>
+        ${artistHtml}
         <span class="track-channel">${escapeHtml(t.channelTitle)}</span>
       </div>
       <span class="leader"></span>
@@ -672,6 +712,7 @@ document.getElementById('trackList').addEventListener('change', (e) => {
     if(e.target.checked) selectedIds.add(id);
     else selectedIds.delete(id);
     updateSelectedCount();
+    updateExportButtons();
   }
 });
 
@@ -699,8 +740,29 @@ function downloadBlob(content, filename, type){
   URL.revokeObjectURL(url);
 }
 
+async function copyText(text, btn){
+  try{
+    await navigator.clipboard.writeText(text);
+    const original = btn.textContent;
+    btn.classList.add('copied');
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      updateExportButtons();
+    }, 1500);
+  } catch(e){
+    setStatus('Could not copy to clipboard.', true, false);
+  }
+}
+
 function toTxt(tracks){
-  return tracks.map(t => t.title).join('\n\n');
+  return tracks.map(t => {
+    if(parseTitles){
+      const p = parseArtistTitle(t.title);
+      return p.artist ? `${p.artist} – ${p.song}` : t.title;
+    }
+    return t.title;
+  }).join('\n\n');
 }
 function toSpotifyLinks(tracks){
   return tracks.map(t => {
@@ -709,7 +771,6 @@ function toSpotifyLinks(tracks){
   }).join('\n');
 }
 
-// ---- Sort buttons ----
 document.querySelectorAll('.sort-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -719,13 +780,28 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
   });
 });
 
-// ---- Search ----
 document.getElementById('searchBox').addEventListener('input', (e) => {
   searchQuery = e.target.value.trim();
   refreshDisplay();
 });
 
-// ---- Build manifest ----
+document.getElementById('durationFilter').addEventListener('change', (e) => {
+  minDuration = parseInt(e.target.value, 10) || 0;
+  refreshDisplay();
+});
+
+document.getElementById('showThumbs').addEventListener('change', (e) => {
+  showThumbs = e.target.checked;
+  localStorage.setItem('manifestShowThumbs', showThumbs);
+  refreshDisplay();
+});
+
+document.getElementById('parseTitles').addEventListener('change', (e) => {
+  parseTitles = e.target.checked;
+  localStorage.setItem('manifestParseTitles', parseTitles);
+  refreshDisplay();
+});
+
 document.getElementById('fetchBtn').addEventListener('click', async () => {
   const apiKey = SHARED_API_KEY;
   const playlistUrl = document.getElementById('playlisturl').value.trim();
@@ -767,12 +843,18 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
     currentTracks = tracks;
     selectedIds = new Set(tracks.map(t => t.videoId));
     currentPlaylistTitle = playlistTitle || 'playlist';
+    currentPlaylistId = playlistId;
     sortMode = 'original';
     searchQuery = '';
+    minDuration = 0;
     document.getElementById('searchBox').value = '';
+    document.getElementById('durationFilter').value = '0';
     document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === 'original'));
 
     document.getElementById('resultsTitle').textContent = playlistTitle || 'Manifest';
+    const ytLink = document.getElementById('openOnYoutube');
+    ytLink.href = `https://www.youtube.com/playlist?list=${encodeURIComponent(playlistId)}`;
+    ytLink.style.display = 'inline';
     document.getElementById('resultsCard').style.display = 'block';
     refreshDisplay();
 
@@ -798,6 +880,16 @@ document.getElementById('exportSpotify').addEventListener('click', () => {
   const selected = getSelectedTracks();
   if(selected.length === 0){ setStatus('No tracks selected to export.', true, false); return; }
   downloadBlob(toSpotifyLinks(selected), `${currentPlaylistTitle}_spotify_search.txt`, 'text/plain');
+});
+document.getElementById('copyTitles').addEventListener('click', () => {
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to copy.', true, false); return; }
+  copyText(toTxt(selected), document.getElementById('copyTitles'));
+});
+document.getElementById('copySpotify').addEventListener('click', () => {
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to copy.', true, false); return; }
+  copyText(toSpotifyLinks(selected), document.getElementById('copySpotify'));
 });
 </script>
 </body>
