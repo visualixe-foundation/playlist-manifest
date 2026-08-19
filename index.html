@@ -298,18 +298,7 @@
     </div>
 
     <div class="tab-panel active" id="keyTab">
-      <p style="font-size:13px; color:var(--ink-soft); line-height:1.6; margin-top:0;">This site works out of the box — no key needed. If you're doing heavy use, you can optionally add your own key below.</p>
-      <details>
-        <summary>Use your own API key instead (optional)</summary>
-        <ol>
-          <li>Go to the <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">Google Cloud Console — YouTube Data API</a> page and sign in.</li>
-          <li>Click <b>Enable</b> (create a project first if prompted).</li>
-          <li>Go to <b>Credentials → Create Credentials → API key</b>.</li>
-          <li>Copy it below.</li>
-        </ol>
-      </details>
-      <label for="apikey">YouTube Data API key (optional)</label>
-      <input type="password" id="apikey" placeholder="Leave blank to use the built-in key" autocomplete="off">
+      <p style="font-size:13px; color:var(--ink-soft); line-height:1.6; margin-top:0; margin-bottom:0;">Ready to go — just paste your playlist link below. No sign-in or key needed.</p>
     </div>
 
     <div class="tab-panel" id="signinTab">
@@ -741,11 +730,10 @@ document.getElementById('searchBox').addEventListener('input', (e) => {
 
 // ---- Build manifest ----
 document.getElementById('fetchBtn').addEventListener('click', async () => {
-  const apiKey = document.getElementById('apikey').value.trim() || SHARED_API_KEY;
+  const apiKey = SHARED_API_KEY;
   const playlistUrl = document.getElementById('playlisturl').value.trim();
   const btn = document.getElementById('fetchBtn');
 
-  if(activeMode === 'key' && !apiKey){ setStatus('Something went wrong — no API key available.', true); return; }
   if(activeMode === 'oauth' && !oauthToken){ setStatus('Sign in with Google first (Private tab).', true); return; }
 
   const playlistId = extractPlaylistId(playlistUrl);
