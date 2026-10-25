@@ -4,4 +4,923 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manifest — Playlist Cataloger</title>
-<!-- truncated for call, will use full -->
+<meta name="description" content="Catalog any YouTube playlist's tracklist — titles and channels — as a downloadable list. No files downloaded, just data.">
+<meta property="og:title" content="Manifest — Playlist Cataloger">
+<meta property="og:description" content="Paste a YouTube playlist link and get every track's title as a clean, downloadable list.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2314120F'/%3E%3Ccircle cx='50' cy='50' r='30' fill='%23E8A23D'/%3E%3Ccircle cx='50' cy='50' r='7' fill='%2314120F'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,900;1,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{
+    --bg: #14120F;
+    --bg-2: #1B1815;
+    --card: #FAF4E6;
+    --ink: #1E1B16;
+    --ink-soft: #4A443A;
+    --accent: #E8A23D;
+    --accent-2: #3E7C74;
+    --muted: #8C8577;
+    --line: rgba(30,27,22,0.18);
+    --danger: #B24B3C;
+    --text-on-bg: #FAF4E6;
+  }
+  body[data-theme="light"]{
+    --bg: #F2EDE0;
+    --bg-2: #E8E0CC;
+    --card: #FFFFFF;
+    --ink: #1E1B16;
+    --ink-soft: #4A443A;
+    --accent: #C9822E;
+    --accent-2: #2F6C63;
+    --muted: #7A7466;
+    --line: rgba(30,27,22,0.14);
+    --text-on-bg: #1E1B16;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse at top, var(--bg-2), var(--bg) 60%);
+    color: var(--text-on-bg);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 48px 20px 80px;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  .wrap{ max-width: 780px; margin: 0 auto; position: relative; }
+  .theme-toggle{
+    position: absolute; top: -8px; right: 0;
+    background: transparent; border: 1.5px solid var(--line);
+    color: var(--text-on-bg); width: 38px; height: 38px;
+    border-radius: 50%; font-size: 16px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle:hover{ border-color: var(--accent); }
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:1px; background: var(--accent); }
+  h1{
+    font-family:'Fraunces', serif; font-weight: 900;
+    font-size: clamp(34px, 6vw, 54px); line-height: 1.02;
+    margin: 0 0 16px; letter-spacing: -0.01em;
+  }
+  h1 em{ font-style: italic; font-weight: 600; color: var(--accent); }
+  .lede{ color: var(--text-on-bg); opacity: 0.82; font-size: 16px; line-height: 1.6; max-width: 58ch; margin: 0 0 40px; }
+  .lede b{ color: var(--text-on-bg); opacity: 1; font-weight: 600; }
+  .card{
+    background: var(--card); color: var(--ink); border-radius: 4px;
+    padding: 28px; margin-bottom: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    animation: fadeInUp 0.4s ease;
+  }
+  @keyframes fadeInUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+  .card h2{ font-family:'Fraunces', serif; font-weight: 600; font-size: 20px; margin: 0 0 4px; }
+  .tabs{ display:flex; gap:6px; margin-bottom: 18px; border-bottom: 1.5px solid var(--line); }
+  .tab{
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.04em;
+    padding: 10px 4px 12px; background: none; border: none; color: var(--muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px;
+  }
+  .tab.active{ color: var(--ink); border-bottom-color: var(--accent-2); font-weight: 600; }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+  label{ display:block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--ink-soft); }
+  input[type=text]{
+    width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 14px;
+    padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 3px;
+    background: #fff; color: var(--ink); margin-bottom: 18px;
+  }
+  input:focus-visible{ outline: 2px solid var(--accent-2); outline-offset: 1px; }
+  .hint{ font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin: -12px 0 18px; }
+  .history-chips{ display:flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .history-chip{
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px;
+    background: transparent; border: 1px solid var(--line); color: var(--muted);
+    padding: 5px 10px; border-radius: 20px; max-width: 220px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .history-chip:hover{ border-color: var(--accent-2); color: var(--ink); }
+  .signin-box{
+    border: 1.5px dashed var(--line); border-radius: 4px;
+    padding: 18px; margin-bottom: 18px; text-align: center;
+  }
+  .btn-google{
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #fff; color: #3c4043; border: 1.5px solid #dadce0;
+    padding: 11px 18px; border-radius: 4px;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: background 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-google:hover{ background: #f8f9fa; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .btn-google svg{ width: 18px; height: 18px; flex-shrink: 0; }
+  .signed-in-as{
+    font-family:'IBM Plex Mono', monospace; font-size: 12.5px;
+    color: var(--accent-2); font-weight: 600; margin-top: 10px;
+  }
+  button{
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    padding: 13px 22px; border-radius: 3px; border: none; cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease, background 0.15s ease;
+  }
+  button:focus-visible{ outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  button:active{ transform: scale(0.98); }
+  button:disabled{ opacity: 0.5; cursor: not-allowed; }
+  .btn-primary{ background: var(--ink); color: var(--card); width: 100%; }
+  .btn-primary:hover:not(:disabled){ opacity: 0.88; }
+  .status{ font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin-top: 14px; color: var(--ink-soft); white-space: pre-wrap; display:flex; align-items:center; gap:8px; }
+  .status.error{ color: var(--danger); }
+  .spinner{
+    display:inline-block; width:13px; height:13px;
+    border: 2px solid var(--line); border-top-color: var(--accent-2);
+    border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink:0;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .manifest-head{ display:flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; gap: 12px; flex-wrap: wrap; }
+  .manifest-count{ font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
+  .yt-link{
+    font-family:'IBM Plex Mono', monospace; font-size: 12px;
+    color: var(--accent-2); text-decoration: none;
+  }
+  .yt-link:hover{ text-decoration: underline; }
+  .manifest-stats{
+    font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+    margin-bottom: 18px; line-height: 1.6;
+  }
+  .toolbar{ display:flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
+  #searchBox{ margin-bottom: 0; }
+  .sort-buttons, .filter-row{ display:flex; gap:6px; flex-wrap: wrap; align-items: center; }
+  .filter-row label{ margin: 0; font-size: 12px; font-weight: 500; }
+  .filter-row select{
+    font-family:'IBM Plex Mono', monospace; font-size: 12px;
+    padding: 6px 10px; border: 1.5px solid var(--line); border-radius: 3px;
+    background: #fff; color: var(--ink);
+  }
+  .toggle-label{
+    display:flex; align-items:center; gap:6px; cursor:pointer;
+    font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+  }
+  .toggle-label input{ width:14px; height:14px; accent-color: var(--accent-2); cursor:pointer; }
+  .select-row{ display:flex; justify-content: flex-end; }
+  .select-all-label{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+  }
+  .select-all-label input{ width:14px; height:14px; accent-color: var(--accent-2); cursor:pointer; }
+  .track-checkbox{ width:15px; height:15px; accent-color: var(--accent-2); cursor:pointer; flex-shrink:0; align-self:center; }
+  .sort-btn{
+    font-family:'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.02em;
+    background: transparent; border: 1.5px solid var(--line); color: var(--ink-soft);
+    padding: 7px 12px; border-radius: 20px;
+  }
+  .sort-btn.active{ background: var(--ink); color: var(--card); border-color: var(--ink); }
+  .track-list{ margin-top: 14px; animation: fadeIn 0.3s ease; }
+  .track-row{ display:flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .track-row:last-child{ border-bottom: none; }
+  .track-thumb{
+    width: 64px; height: 36px; object-fit: cover; border-radius: 2px;
+    flex-shrink: 0; background: var(--line);
+  }
+  .track-num{ font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent-2); min-width: 28px; flex-shrink: 0; }
+  .track-main{ flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .track-title{ font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-artist{ font-size: 12px; color: var(--accent-2); margin-top: 1px; }
+  .track-channel{ font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .dup-badge{
+    font-family:'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.05em;
+    background: var(--danger); color: #fff; padding: 2px 6px; border-radius: 2px;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .leader{ flex: 1; border-bottom: 2px dotted var(--line); height: 0.6em; min-width: 12px; }
+  .track-duration{ font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--ink-soft); flex-shrink: 0; }
+  .no-results{ font-family:'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); padding: 24px 0; text-align:center; line-height: 1.6; }
+  .exports{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; padding-top: 22px; border-top: 1.5px solid var(--line); }
+  .btn-export, .btn-copy{
+    background: transparent; border: 1.5px solid var(--ink); color: var(--ink);
+    flex: 1; min-width: 140px; font-size: 13px; padding: 12px 14px;
+  }
+  .btn-export:hover:not(:disabled), .btn-copy:hover:not(:disabled){ background: var(--ink); color: var(--card); }
+  .btn-copy.copied{ border-color: var(--accent-2); color: var(--accent-2); }
+  .footer{
+    font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+    line-height: 1.6; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line);
+    text-align: center;
+  }
+  .footer a{ color: var(--accent-2); }
+  .footer-tagline{
+    font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+    text-align: center; margin-top: 10px; opacity: 0.75;
+  }
+  @media (max-width: 560px){
+    .card{ padding: 20px; }
+    .track-channel, .track-artist{ white-space: normal; }
+    .exports{ flex-direction: column; }
+    .theme-toggle{ position: static; margin-bottom: 16px; }
+    .track-thumb{ width: 48px; height: 27px; }
+  }
+</style>
+</head>
+<body data-theme="dark">
+<div class="wrap">
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">🌙</button>
+
+  <div class="eyebrow">No files downloaded · metadata only</div>
+  <h1>Catalog the <em>whole</em> playlist,<br>skip the download.</h1>
+  <p class="lede">Paste a YouTube playlist link — public, unlisted, or private — and get every track's title as a clean, downloadable list. <b>No audio or video is ever downloaded.</b></p>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-tab="keyTab">Public / Unlisted</button>
+      <button class="tab" data-tab="signinTab">Private</button>
+    </div>
+
+    <div class="tab-panel active" id="keyTab">
+      <p style="font-size:13px; color:var(--ink-soft); line-height:1.6; margin-top:0; margin-bottom:18px;">Ready to go — just paste your playlist link below. No sign-in needed.</p>
+    </div>
+
+    <div class="tab-panel" id="signinTab">
+      <p style="font-size:13px; color:var(--ink-soft); line-height:1.6; margin-top:0;">Private playlists can only be read by the account that owns them. Sign in with the Google account that owns the playlist, then paste the link below.</p>
+      <div class="signin-box">
+        <button type="button" class="btn-google" id="googleSigninBtn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Sign in with Google
+        </button>
+        <div class="signed-in-as" id="signedInAs"></div>
+      </div>
+    </div>
+
+    <h2>1. Paste the playlist link</h2>
+    <div class="history-chips" id="historyChips" style="display:none;"></div>
+    <label for="playlisturl">Playlist URL</label>
+    <input type="text" id="playlisturl" placeholder="https://www.youtube.com/playlist?list=...">
+    <div class="hint" id="lastPlaylistHint" style="display:none;"></div>
+
+    <button class="btn-primary" id="fetchBtn">Build manifest</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="card" id="resultsCard" style="display:none;">
+    <div class="manifest-head">
+      <h2 id="resultsTitle">Manifest</h2>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <a class="yt-link" id="openOnYoutube" href="#" target="_blank" rel="noopener" style="display:none;">Open on YouTube ↗</a>
+        <span class="manifest-count" id="resultsCount"></span>
+      </div>
+    </div>
+    <div class="manifest-stats" id="manifestStats"></div>
+
+    <div class="toolbar">
+      <input type="text" id="searchBox" placeholder="Search titles, artists, or channels…">
+      <div class="sort-buttons">
+        <button class="sort-btn active" data-sort="original">Playlist order</button>
+        <button class="sort-btn" data-sort="title">Title A–Z</button>
+        <button class="sort-btn" data-sort="channel">Channel A–Z</button>
+        <button class="sort-btn" data-sort="duration">Longest first</button>
+      </div>
+      <div class="filter-row">
+        <label for="durationFilter">Duration</label>
+        <select id="durationFilter">
+          <option value="0">Any length</option>
+          <option value="60">Over 1 min</option>
+          <option value="180">Over 3 min</option>
+          <option value="300">Over 5 min</option>
+          <option value="600">Over 10 min</option>
+        </select>
+        <label class="toggle-label">
+          <input type="checkbox" id="showThumbs" checked>
+          Thumbnails
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="parseTitles" checked>
+          Parse Artist – Song
+        </label>
+      </div>
+      <div class="select-row">
+        <label class="select-all-label">
+          <input type="checkbox" id="selectAllBox" checked>
+          <span id="selectedCount">0 of 0 selected</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="track-list" id="trackList"></div>
+
+    <div class="exports">
+      <button class="btn-export" id="exportTxt">↓ Selected titles (.txt)</button>
+      <button class="btn-export" id="exportSpotify">↓ Spotify search links</button>
+      <button class="btn-copy" id="copyTitles">Copy titles</button>
+      <button class="btn-copy" id="copySpotify">Copy Spotify links</button>
+    </div>
+
+    <div style="margin-top: 22px; padding-top: 18px; border-top: 1.5px solid var(--line);">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px;">Full Info</div>
+      <div class="exports" style="margin-top: 0; padding-top: 0; border-top: none;">
+        <button class="btn-export" id="exportFullInfo">↓ Full info (.txt)</button>
+        <button class="btn-copy" id="copyFullInfo">Copy full info</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer">© 2026 <a href="https://visualixe-foundation.vercel.app" target="_blank" rel="noopener">Visualixe Foundation</a>. All rights reserved.<span id="visitCount"></span></p>
+  <p class="footer-tagline">Built with purpose</p>
+</div>
+
+<script>
+const SHARED_API_KEY = "AIzaSyCrpOmxL4KJQR1SDRWf-m-3h6pqpqmDFas";
+const OAUTH_CLIENT_ID = "197770264166-4jmgvh9hbo8tjeb720sp0sopqlv3ob6u.apps.googleusercontent.com";
+
+let currentTracks = [];
+let currentPlaylistTitle = "playlist";
+let currentPlaylistId = null;
+let skippedCount = 0;
+let oauthToken = null;
+let activeMode = 'key';
+let sortMode = 'original';
+let searchQuery = '';
+let minDuration = 0;
+let showThumbs = true;
+let parseTitles = true;
+let selectedIds = new Set();
+
+// ---- Theme ----
+function applyTheme(theme){
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('manifestTheme', theme);
+  document.getElementById('themeToggle').textContent = theme === 'light' ? '🌙' : '☀️';
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.body.getAttribute('data-theme');
+  applyTheme(current === 'light' ? 'dark' : 'light');
+});
+applyTheme(localStorage.getItem('manifestTheme') || 'dark');
+
+// ---- Playlist history ----
+function getHistory(){
+  try{ return JSON.parse(localStorage.getItem('manifestHistory') || '[]'); }
+  catch(e){ return []; }
+}
+function saveToHistory(url, title){
+  let history = getHistory().filter(h => h.url !== url);
+  history.unshift({ url, title: title || url, date: Date.now() });
+  history = history.slice(0, 8);
+  localStorage.setItem('manifestHistory', JSON.stringify(history));
+  renderHistory();
+}
+function renderHistory(){
+  const container = document.getElementById('historyChips');
+  const history = getHistory();
+  if(history.length === 0){ container.style.display = 'none'; return; }
+  container.style.display = 'flex';
+  container.innerHTML = history.map(h =>
+    `<button type="button" class="history-chip" data-url="${escapeHtml(h.url)}">${escapeHtml(h.title)}</button>`
+  ).join('');
+  container.querySelectorAll('.history-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.getElementById('playlisturl').value = chip.dataset.url;
+    });
+  });
+}
+
+// ---- Init: last playlist + last mode ----
+window.addEventListener('DOMContentLoaded', () => {
+  const last = localStorage.getItem('manifestLastPlaylist');
+  if(last){
+    document.getElementById('playlisturl').value = last;
+    const hint = document.getElementById('lastPlaylistHint');
+    hint.style.display = 'block';
+    hint.textContent = '↺ Loaded your last playlist link — click Build manifest to refresh it.';
+  }
+  renderHistory();
+
+  const lastMode = localStorage.getItem('manifestLastMode');
+  if(lastMode === 'oauth'){
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="signinTab"]').classList.add('active');
+    document.getElementById('signinTab').classList.add('active');
+    activeMode = 'oauth';
+  }
+
+  const savedThumbs = localStorage.getItem('manifestShowThumbs');
+  if(savedThumbs !== null){
+    showThumbs = savedThumbs === 'true';
+    document.getElementById('showThumbs').checked = showThumbs;
+  }
+  const savedParse = localStorage.getItem('manifestParseTitles');
+  if(savedParse !== null){
+    parseTitles = savedParse === 'true';
+    document.getElementById('parseTitles').checked = parseTitles;
+  }
+});
+
+fetch('https://api.countapi.xyz/hit/visualixe-foundation-manifest/visits')
+  .then(r => r.json())
+  .then(d => {
+    if(d && d.value){
+      document.getElementById('visitCount').textContent = ' · ' + d.value.toLocaleString() + ' visits';
+    }
+  })
+  .catch(() => {});
+
+// ---- Tabs ----
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    activeMode = tab.dataset.tab === 'keyTab' ? 'key' : 'oauth';
+    localStorage.setItem('manifestLastMode', activeMode);
+  });
+});
+
+// ---- Google Sign-in ----
+let tokenClient = null;
+function initGoogleSignIn(){
+  if(!OAUTH_CLIENT_ID || typeof google === 'undefined') return false;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: OAUTH_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+    callback: (resp) => {
+      if(resp.access_token){
+        oauthToken = resp.access_token;
+        document.getElementById('signedInAs').textContent = 'Signed in ✓ ready to read private playlists';
+        document.getElementById('googleSigninBtn').style.display = 'none';
+      }
+    }
+  });
+  return true;
+}
+document.getElementById('googleSigninBtn').addEventListener('click', () => {
+  if(!initGoogleSignIn()){
+    setStatus('Google Sign-In is not ready yet. Please try again in a moment.', true);
+    return;
+  }
+  if(tokenClient) tokenClient.requestAccessToken();
+});
+
+function extractPlaylistId(input){
+  const m = input.match(/[?&]list=([a-zA-Z0-9_-]+)/) || input.match(/^([a-zA-Z0-9_-]{10,})$/);
+  return m ? m[1] : null;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
+}
+
+function setStatus(msg, isError, showSpinner){
+  const el = document.getElementById('status');
+  el.className = 'status' + (isError ? ' error' : '');
+  el.innerHTML = (showSpinner ? '<span class="spinner"></span> ' : '') + escapeHtml(msg);
+}
+
+function authedUrl(base, apiKey){
+  if(activeMode === 'oauth' && oauthToken){
+    return base + (base.includes('?') ? '&' : '?') + 'access_token=' + encodeURIComponent(oauthToken);
+  }
+  return base + (base.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(apiKey);
+}
+
+async function authedFetch(url){
+  return fetch(url);
+}
+
+function parseISODuration(iso){
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if(!m) return { text: '—', seconds: 0 };
+  const h = parseInt(m[1]||0,10), mi = parseInt(m[2]||0,10), s = parseInt(m[3]||0,10);
+  const total = h*3600 + mi*60 + s;
+  let text;
+  if(h) text = h + ':' + String(mi).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  else text = mi + ':' + String(s).padStart(2,'0');
+  return { text, seconds: total };
+}
+
+function parseArtistTitle(title){
+  const seps = [' - ', ' – ', ' — ', ' | ', ': '];
+  for(const sep of seps){
+    const i = title.indexOf(sep);
+    if(i > 0 && i < title.length - sep.length){
+      return { artist: title.slice(0,i).trim(), song: title.slice(i+sep.length).trim() };
+    }
+  }
+  return { artist: null, song: title };
+}
+
+async function fetchAllPlaylistItems(apiKey, playlistId, onProgress){
+  let items = [], skipped = 0, pageToken = '';
+  do {
+    const base = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${encodeURIComponent(playlistId)}${pageToken ? '&pageToken='+pageToken : ''}`;
+    const url = authedUrl(base, apiKey);
+    const res = await authedFetch(url);
+    const data = await res.json();
+    if(!res.ok){
+      throw new Error(data.error?.message || `Request failed (${res.status})`);
+    }
+    for(const item of data.items){
+      const s = item.snippet;
+      if(s.title === 'Deleted video' || s.title === 'Private video'){ skipped++; continue; }
+      const thumb = s.thumbnails?.medium?.url || s.thumbnails?.default?.url || '';
+      items.push({
+        position: s.position + 1,
+        title: s.title,
+        channelTitle: s.videoOwnerChannelTitle || s.channelTitle || 'Unknown',
+        videoId: s.resourceId?.videoId,
+        thumbnail: thumb
+      });
+    }
+    pageToken = data.nextPageToken || '';
+    if(onProgress) onProgress(items.length);
+  } while(pageToken);
+
+  return { items, skipped };
+}
+
+async function fetchPlaylistTitle(apiKey, playlistId){
+  const base = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${encodeURIComponent(playlistId)}`;
+  const url = authedUrl(base, apiKey);
+  const res = await authedFetch(url);
+  const data = await res.json();
+  if(res.ok && data.items && data.items.length){
+    return data.items[0].snippet.title;
+  }
+  return null;
+}
+
+async function fetchVideoDetails(apiKey, videoIds){
+  const details = {};
+  for(let i=0; i<videoIds.length; i+=50){
+    const chunk = videoIds.slice(i, i+50);
+    const base = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics&id=${chunk.join(',')}`;
+    const url = authedUrl(base, apiKey);
+    const res = await authedFetch(url);
+    const data = await res.json();
+    if(!res.ok){
+      throw new Error(data.error?.message || `Request failed (${res.status})`);
+    }
+    for(const item of data.items){
+      const dur = parseISODuration(item.contentDetails.duration);
+      const viewCount = item.statistics?.viewCount ? parseInt(item.statistics.viewCount, 10) : null;
+      const publishedAt = item.snippet?.publishedAt || null;
+      details[item.id] = {
+        duration: dur.text,
+        durationSeconds: dur.seconds,
+        viewCount,
+        publishedAt
+      };
+    }
+  }
+  return details;
+}
+
+function formatViewCount(n){
+  if(n == null) return '—';
+  if(n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+  if(n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  if(n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+  return String(n);
+}
+
+function formatPublished(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '—';
+  const now = new Date();
+  const diffMs = now - d;
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if(days < 1) return 'Today';
+  if(days < 7) return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+  if(days < 30) {
+    const w = Math.floor(days / 7);
+    return w + ' week' + (w === 1 ? '' : 's') + ' ago';
+  }
+  if(days < 365) {
+    const m = Math.floor(days / 30);
+    return m + ' month' + (m === 1 ? '' : 's') + ' ago';
+  }
+  const y = Math.floor(days / 365);
+  return y + ' year' + (y === 1 ? '' : 's') + ' ago';
+}
+
+function markDuplicates(tracks){
+  const idCount = {}, titleCount = {};
+  tracks.forEach(t => {
+    idCount[t.videoId] = (idCount[t.videoId]||0) + 1;
+    const key = t.title.trim().toLowerCase() + '|' + t.channelTitle.trim().toLowerCase();
+    titleCount[key] = (titleCount[key]||0) + 1;
+  });
+  tracks.forEach(t => {
+    const key = t.title.trim().toLowerCase() + '|' + t.channelTitle.trim().toLowerCase();
+    t.isDuplicate = idCount[t.videoId] > 1 || titleCount[key] > 1;
+  });
+}
+
+function getDisplayedTracks(){
+  let list = [...currentTracks];
+  if(sortMode === 'title') list.sort((a,b) => a.title.localeCompare(b.title));
+  else if(sortMode === 'channel') list.sort((a,b) => a.channelTitle.localeCompare(b.channelTitle));
+  else if(sortMode === 'duration') list.sort((a,b) => b.durationSeconds - a.durationSeconds);
+  else list.sort((a,b) => a.position - b.position);
+
+  if(minDuration > 0){
+    list = list.filter(t => (t.durationSeconds || 0) >= minDuration);
+  }
+  if(searchQuery){
+    const q = searchQuery.toLowerCase();
+    list = list.filter(t => {
+      const parsed = parseArtistTitle(t.title);
+      return t.title.toLowerCase().includes(q)
+        || t.channelTitle.toLowerCase().includes(q)
+        || (parsed.artist && parsed.artist.toLowerCase().includes(q))
+        || (parsed.song && parsed.song.toLowerCase().includes(q));
+    });
+  }
+  return list;
+}
+
+function refreshDisplay(){
+  renderTracks(getDisplayedTracks());
+  updateStats();
+  updateSelectedCount();
+  updateExportButtons();
+}
+
+function getSelectedTracks(){
+  return getDisplayedTracks().filter(t => selectedIds.has(t.videoId));
+}
+
+function updateSelectedCount(){
+  const el = document.getElementById('selectedCount');
+  if(el) el.textContent = `${selectedIds.size} of ${currentTracks.length} selected`;
+  const selectAllBox = document.getElementById('selectAllBox');
+  if(selectAllBox) selectAllBox.checked = selectedIds.size === currentTracks.length && currentTracks.length > 0;
+}
+
+function updateExportButtons(){
+  const n = getSelectedTracks().length;
+  document.getElementById('exportTxt').textContent = `↓ Selected titles (${n})`;
+  document.getElementById('exportSpotify').textContent = `↓ Spotify links (${n})`;
+  document.getElementById('copyTitles').textContent = `Copy titles (${n})`;
+  document.getElementById('copySpotify').textContent = `Copy Spotify links (${n})`;
+  const fullBtn = document.getElementById('exportFullInfo');
+  const copyFullBtn = document.getElementById('copyFullInfo');
+  if(fullBtn) fullBtn.textContent = `↓ Full info (${n})`;
+  if(copyFullBtn) copyFullBtn.textContent = `Copy full info (${n})`;
+}
+
+function renderTracks(tracks){
+  const list = document.getElementById('trackList');
+  if(tracks.length === 0){
+    list.innerHTML = '<div class="no-results">No tracks match your filters.</div>';
+    return;
+  }
+  list.innerHTML = tracks.map(t => {
+    const parsed = parseTitles ? parseArtistTitle(t.title) : { artist: null, song: t.title };
+    const titleHtml = parsed.artist
+      ? `<span class="track-artist">${escapeHtml(parsed.artist)}</span><span class="track-title">${escapeHtml(parsed.song)}</span>`
+      : `<span class="track-title">${escapeHtml(t.title)}</span>`;
+    const dup = t.isDuplicate ? '<span class="dup-badge">DUP</span>' : '';
+    const thumb = showThumbs && t.thumbnail
+      ? `<img class="track-thumb" src="${escapeHtml(t.thumbnail)}" alt="" loading="lazy">`
+      : '';
+    return `<div class="track-row">
+      <input type="checkbox" class="track-checkbox" data-id="${escapeHtml(t.videoId)}" ${selectedIds.has(t.videoId) ? 'checked' : ''}>
+      ${thumb}
+      <span class="track-num">${t.position}</span>
+      <div class="track-main">${titleHtml}${dup}<div class="track-channel">${escapeHtml(t.channelTitle)}</div></div>
+      <span class="leader"></span>
+      <span class="track-duration">${escapeHtml(t.duration || '—')}</span>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.track-checkbox').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const id = cb.dataset.id;
+      if(cb.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateSelectedCount();
+      updateExportButtons();
+    });
+  });
+}
+
+function updateStats(){
+  const el = document.getElementById('manifestStats');
+  const total = currentTracks.length;
+  const selected = selectedIds.size;
+  const dups = currentTracks.filter(t => t.isDuplicate).length;
+  el.textContent = `${total} tracks · ${selected} selected` + (dups ? ` · ${dups} possible duplicates` : '') + (skippedCount ? ` · ${skippedCount} unavailable skipped` : '');
+}
+
+function toTxt(tracks){
+  return tracks.map(t => {
+    if(parseTitles){
+      const p = parseArtistTitle(t.title);
+      return p.artist ? `${p.artist} – ${p.song}` : t.title;
+    }
+    return t.title;
+  }).join('\n\n');
+}
+function toSpotifyLinks(tracks){
+  return tracks.map(t => {
+    const query = encodeURIComponent(`${t.title} ${t.channelTitle}`);
+    return `${t.title} — ${t.channelTitle}\nhttps://open.spotify.com/search/${query}\n`;
+  }).join('\n');
+}
+function toFullInfo(tracks){
+  return tracks.map(t => {
+    let line1;
+    if(parseTitles){
+      const p = parseArtistTitle(t.title);
+      line1 = p.artist ? `${p.artist} – ${p.song}` : t.title;
+    } else {
+      line1 = t.title;
+    }
+    const views = formatViewCount(t.viewCount) + ' views';
+    const published = formatPublished(t.publishedAt);
+    return `${line1}\n${views} · ${published}`;
+  }).join('\n\n');
+}
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    sortMode = btn.dataset.sort;
+    refreshDisplay();
+  });
+});
+
+document.getElementById('searchBox').addEventListener('input', (e) => {
+  searchQuery = e.target.value.trim();
+  refreshDisplay();
+});
+
+document.getElementById('durationFilter').addEventListener('change', (e) => {
+  minDuration = parseInt(e.target.value, 10) || 0;
+  refreshDisplay();
+});
+
+document.getElementById('showThumbs').addEventListener('change', (e) => {
+  showThumbs = e.target.checked;
+  localStorage.setItem('manifestShowThumbs', showThumbs);
+  refreshDisplay();
+});
+
+document.getElementById('parseTitles').addEventListener('change', (e) => {
+  parseTitles = e.target.checked;
+  localStorage.setItem('manifestParseTitles', parseTitles);
+  refreshDisplay();
+});
+
+document.getElementById('fetchBtn').addEventListener('click', async () => {
+  const apiKey = SHARED_API_KEY;
+  const playlistUrl = document.getElementById('playlisturl').value.trim();
+  const btn = document.getElementById('fetchBtn');
+
+  if(activeMode === 'oauth' && !oauthToken){ setStatus('Sign in with Google first (Private tab).', true); return; }
+
+  const playlistId = extractPlaylistId(playlistUrl);
+  if(!playlistId){ setStatus("That doesn't look like a playlist link. Look for '?list=' in the URL.", true); return; }
+
+  btn.disabled = true;
+  document.getElementById('resultsCard').style.display = 'none';
+  setStatus('Fetching tracklist…', false, true);
+
+  try{
+    const [playlistResult, playlistTitle] = await Promise.all([
+      fetchAllPlaylistItems(apiKey, playlistId, (count) => setStatus(`Fetching tracklist… ${count} found so far`, false, true)),
+      fetchPlaylistTitle(apiKey, playlistId)
+    ]);
+    const { items, skipped } = playlistResult;
+    skippedCount = skipped;
+
+    if(items.length === 0){
+      setStatus('No accessible videos found in that playlist. If it\'s private, make sure you signed in with the owning account.', true, false);
+      btn.disabled = false;
+      return;
+    }
+
+    setStatus(`Found ${items.length} tracks. Fetching video details…`, false, true);
+    const videoIds = items.map(i => i.videoId).filter(Boolean);
+    const details = await fetchVideoDetails(apiKey, videoIds);
+
+    const tracks = items.map(i => {
+      const d = details[i.videoId] || { duration: '—', durationSeconds: 0, viewCount: null, publishedAt: null };
+      return {
+        ...i,
+        duration: d.duration,
+        durationSeconds: d.durationSeconds,
+        viewCount: d.viewCount,
+        publishedAt: d.publishedAt
+      };
+    });
+    markDuplicates(tracks);
+
+    currentTracks = tracks;
+    selectedIds = new Set(tracks.map(t => t.videoId));
+    currentPlaylistTitle = playlistTitle || 'playlist';
+    currentPlaylistId = playlistId;
+    sortMode = 'original';
+    searchQuery = '';
+    minDuration = 0;
+    document.getElementById('searchBox').value = '';
+    document.getElementById('durationFilter').value = '0';
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === 'original'));
+
+    document.getElementById('resultsTitle').textContent = playlistTitle || 'Manifest';
+    const ytLink = document.getElementById('openOnYoutube');
+    ytLink.href = `https://www.youtube.com/playlist?list=${encodeURIComponent(playlistId)}`;
+    ytLink.style.display = 'inline';
+    document.getElementById('resultsCard').style.display = 'block';
+    refreshDisplay();
+
+    localStorage.setItem('manifestLastPlaylist', playlistUrl);
+    saveToHistory(playlistUrl, playlistTitle || 'Untitled playlist');
+    document.getElementById('lastPlaylistHint').style.display = 'none';
+
+    const skipMsg = skippedCount > 0 ? ` (${skippedCount} unavailable skipped)` : '';
+    setStatus(`Done — ${tracks.length} tracks catalogued${skipMsg}.`, false, false);
+  } catch(err){
+    setStatus('Error: ' + err.message, true, false);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('exportTxt').addEventListener('click', () => {
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to export.', true, false); return; }
+  downloadBlob(toTxt(selected), `${currentPlaylistTitle}.txt`, 'text/plain');
+});
+document.getElementById('exportSpotify').addEventListener('click', () => {
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to export.', true, false); return; }
+  downloadBlob(toSpotifyLinks(selected), `${currentPlaylistTitle}_spotify_search.txt`, 'text/plain');
+});
+document.getElementById('copyTitles').addEventListener('click', () => {
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to copy.', true, false); return; }
+  copyText(toTxt(selected), document.getElementById('copyTitles'));
+});
+document.getElementById('copySpotify').addEventListener('click', () => {
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to copy.', true, false); return; }
+  copyText(toSpotifyLinks(selected), document.getElementById('copySpotify'));
+});
+
+document.getElementById('exportFullInfo').addEventListener('click', () => {
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to export.', true, false); return; }
+  downloadBlob(toFullInfo(selected), `${currentPlaylistTitle}_full_info.txt`, 'text/plain');
+});
+document.getElementById('copyFullInfo').addEventListener('click', () => {
+  const selected = getSelectedTracks();
+  if(selected.length === 0){ setStatus('No tracks selected to copy.', true, false); return; }
+  copyText(toFullInfo(selected), document.getElementById('copyFullInfo'));
+});
+
+function downloadBlob(text, filename, mime){
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyText(text, btn){
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.classList.add('copied');
+    btn.textContent = 'Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      updateExportButtons();
+    }, 1500);
+  }).catch(() => setStatus('Could not copy to clipboard.', true, false));
+}
+
+document.getElementById('selectAllBox').addEventListener('change', (e) => {
+  if(e.target.checked){
+    currentTracks.forEach(t => selectedIds.add(t.videoId));
+  } else {
+    selectedIds.clear();
+  }
+  refreshDisplay();
+});
+</script>
+</body>
+</html>
